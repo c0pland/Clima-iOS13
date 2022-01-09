@@ -7,13 +7,9 @@
 //
 
 import UIKit
+import CoreLocation
 
-class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManagerDelegate {
-   
-    
-    
-
-    
+class WeatherViewController: UIViewController {
     @IBOutlet weak var searchField: UITextField!
     @IBOutlet weak var conditionImageView: UIImageView!
     @IBOutlet weak var temperatureLabel: UILabel!
@@ -21,9 +17,18 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
     var weatherManager = WeatherManager()
     override func viewDidLoad() {
         super.viewDidLoad()
+        let locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
         weatherManager.delegate = self
         searchField.delegate = self
     }
+}
+
+
+
+extension WeatherViewController: UITextFieldDelegate {
     @IBAction func searchPressed(_ sender: UIButton) {
         if let city = searchField.text {
             weatherManager.fetchWeather(city: city)
@@ -49,7 +54,9 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
             return false
         }
     }
-    
+}
+
+extension WeatherViewController: WeatherManagerDelegate {
     func didUpdateWeather(_ weatherMAnager: WeatherManager, weather: WeatherModel) {
         DispatchQueue.main.async {
             self.temperatureLabel.text = weather.temperatureStr
@@ -65,3 +72,15 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
     }
 }
 
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            weatherManager.fetchWeather(latitude: lat, longtitude: lon)
+        }
+    }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
+}

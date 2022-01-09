@@ -13,6 +13,10 @@ struct WeatherManager {
         let urlString = "\(weatherURL)&q=\(city)"
         performRequest(urlString)
     }
+    func fetchWeather(latitude: Double, longtitude: Double) {
+        let urlString = "\(weatherURL)&lat=\(latitude)&lon=\(longtitude)"
+        performRequest(urlString)
+    }
     func performRequest(_ urlString: String) {
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
